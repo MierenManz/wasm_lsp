@@ -1,5 +1,5 @@
 mod wasm_lexer;
-
+mod wasm_parser;
 use logos::Logos;
 use wasm_lexer::Tokens;
 
