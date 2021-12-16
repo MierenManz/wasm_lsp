@@ -1,12 +1,7 @@
 use logos::Logos;
-use super::callbacks::local_ptr;
-use super::callbacks::get_variable_type;
-use super::callbacks::tuple_ptr_and_type;
-use super::callbacks::maybe_ptr;
 
-use super::types::Type;
 #[derive(Debug, Logos, PartialEq)]
-pub enum Tokens {
+pub enum Tokens<'a> {
     #[error]
     Error,
 
@@ -16,35 +11,35 @@ pub enum Tokens {
     #[token(")")]
     ScopeClose,
 
-    #[regex("module", |_| None as Option<String>)]
-    #[regex(r"module[ \t\n\f]+\$[\x20-\x7E\x80-\xFF]+", |lex| maybe_ptr(lex, 7))]
-    Module(Option<String>),
+    #[token("module")]
+    Module,
 
-    #[regex("func", |_| None as Option<String>)]
-    #[regex(r"func[ \t\n\f]+\$[\x20-\x7E\x80-\xFF]+", |lex| maybe_ptr(lex, 5))]
-    Func(Option<String>),
+    #[token("func")]
+    Func,
 
-    #[regex(r"result (i32|i64)", |lex| get_variable_type(lex, 7))]
-    Result(Type),
+    #[token("param")]
+    Param,
+    
+    #[token("result")]
+    Result,
 
-    #[regex(r"param (i32|i64)", |lex|{ (get_variable_type(lex, 6), None as Option<String>)})]
-    #[regex(r"param \$[\x20-\x7E\x80-\xFF]+[ \t\n\f]+(i32|i64)", |lex| tuple_ptr_and_type(lex, 6))]
-    Param((Type, Option<String>)),
+    #[token("local")]
+    Local,
 
-    #[regex(r"local (i32|i64)", |lex|{ (get_variable_type(lex, 6), None as Option<String>)})]
-    #[regex(r"local \$[\x20-\x7E\x80-\xFF]+[ \t\n\f]+(i32|i64)", |lex| tuple_ptr_and_type(lex, 6))]
-    LocalVariable((Type, Option<String>)),
+    #[token("global")]
+    Global,
 
-    #[regex(r"local.get \$[0-9 a-z A-Z]+", local_ptr)]
-    #[regex(r"local.get [0-9]+", local_ptr)]
-    LocalGet(String),
+    #[regex(r"\.[0-9a-z_\.]+")]
+    DotExpression(&'a str),
 
-    #[regex(r"local.set (\$[0-9 a-z A-Z]|[0-9])+", local_ptr)]
-    LocalSet(String),
+    #[token("i64")]
+    #[token("i32")]
+    Type(&'a str),
 
-    #[token("i32.mul")]
-    I32Mul,
+    #[regex("\\$[\x21-\x7E]+")]
+    #[regex(r"[0-9]+")]
+    Value(&'a str),
 
-    #[regex(r"[ \t\n\f]+", logos::skip)]
+    #[regex(r"[\s]+", logos::skip)]
     WhiteSpace
 }
