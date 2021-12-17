@@ -19,7 +19,7 @@ pub enum Tokens<'a> {
 
     #[token("param")]
     Param,
-    
+
     #[token("result")]
     Result,
 
@@ -41,5 +41,5 @@ pub enum Tokens<'a> {
     Value(&'a str),
 
     #[regex(r"[\s]+", logos::skip)]
-    WhiteSpace
+    WhiteSpace,
 }
