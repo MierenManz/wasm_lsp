@@ -5,11 +5,13 @@ use super::structs::Type;
 use super::Tokens;
 use logos::Lexer;
 
-pub struct Ast<'a> {
-    inner: Module<'a>,
+type MutLexer<'a> = &'a mut Lexer<'a, Tokens<'a>>;
+
+pub struct Ast {
+    inner: Module,
 }
 
-pub fn parse<'a, 'b>(lexer: &mut Lexer<'a, Tokens<'a>>) -> Result<Ast<'b>, &'a str> {
+pub fn parse<'a>(lexer: MutLexer) -> Result<Ast, &'a str> {
     let mut ast = Ast {
         inner: get_module(lexer)?,
     };
@@ -22,12 +24,25 @@ pub fn parse<'a, 'b>(lexer: &mut Lexer<'a, Tokens<'a>>) -> Result<Ast<'b>, &'a s
         if statement != Tokens::NewScope {
             return Err("Unexpected token");
         }
+
+        let next_statement = match lexer.next() {
+            Some(v) => v,
+            None => return Err("Unexpected EOF"),
+        };
+
+        match next_statement {
+            Tokens::Func => {
+                let function = parse_function(&mut lexer)?;
+                ast.inner.items.push(ModuleItems::Function(function));
+            },
+            Tokens::
+        }
     }
 
     Ok(ast)
 }
 
-pub fn get_module<'a, 'b>(lexer: &mut Lexer<'a, Tokens<'a>>) -> Result<Module<'b>, &'static str> {
+pub fn get_module<'a>(lexer: MutLexer) -> Result<Module, &'static str> {
     let new_scope = match lexer.next() {
         Some(v) => v,
         None => return Err("Empty file"),
@@ -41,11 +56,23 @@ pub fn get_module<'a, 'b>(lexer: &mut Lexer<'a, Tokens<'a>>) -> Result<Module<'b
     if new_scope != Tokens::NewScope || module_token != Tokens::Module {
         Err("Unexpected Token")
     } else {
-        let module = Module {
-            items: Vec::new(),
-            span: (1, lexer.source().len() - 1),
-        };
+        let module = Module { items: Vec::new() };
 
         Ok(module)
     }
+}
+
+fn parse_function<'a>(lexer: MutLexer) -> Result<Function, &'a str> {
+    let func = Function::default();
+    loop {
+        let statement = match lexer.next() {
+            Some(v) => v,
+            None => return Err("Unexpected EOF"),
+        };
+
+        match statement {
+            Tokens::Error => 
+        }
+    }
+    Ok(func)
 }

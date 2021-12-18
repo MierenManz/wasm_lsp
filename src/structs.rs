@@ -1,38 +1,66 @@
-pub enum Type<'a> {
+pub enum Type {
     I32,
     I64,
-    FuncRef(Box<dyn AsRef<Function<'a>>>),
+    FuncRef(Box<dyn AsRef<Function>>),
 }
 
-pub struct Export<'a> {
-    pub exported_name: &'a str,
-    pub export: Box<dyn AsRef<ModuleItems<'a>>>,
+pub struct Export {
+    pub exported_name: String,
+    pub exported: Box<dyn AsRef<ModuleItems>>,
 }
 
-pub struct Function<'a> {
-    pub name: Option<&'a str>,
-    pub span: (usize, usize),
-    pub ptr: usize,
-    pub parameters: Option<Vec<Type<'a>>>,
-    pub locals: Option<Vec<Type<'a>>>,
-    pub result: Option<Vec<Type<'a>>>,
-    pub export: Option<Box<Export<'a>>>,
+pub struct Function {
+    pub name: Option<String>,
+    // pub ptr: usize,
+    pub parameters: Option<Vec<Type>>,
+    pub locals: Option<Vec<Type>>,
+    pub result: Option<Vec<Type>>,
+    pub export: Option<Box<Export>>,
 }
 
-pub struct Memory<'a> {
-    pub name: Option<&'a str>,
-    pub span: (usize, usize),
+impl Default for Function {
+    fn default() -> Self {
+        Self {
+            name: None,
+            // ptr: usize::MAX,
+            parameters: None,
+            locals: None,
+            result: None,
+            export: None,
+        }
+    }
+}
+
+#[derive(PartialEq, Eq)]
+pub struct Memory {
+    pub name: Option<String>,
     pub size: usize,
-    pub ptr: usize,
+    // pub ptr: usize,
 }
 
-pub enum ModuleItems<'a> {
-    Function(Function<'a>),
-    Memory(Memory<'a>),
-    Export(Export<'a>),
+pub struct Global {
+    pub name: Option<String>,
+    pub mutatable: bool,
+    pub value: String,
 }
 
-pub struct Module<'a> {
-    pub items: Vec<ModuleItems<'a>>,
-    pub span: (usize, usize),
+pub enum ModuleItems {
+    Global(Global),
+    Function(Function),
+    Memory(Memory),
+    Export(Export),
+}
+
+pub struct Module {
+    pub items: Vec<ModuleItems>,
+}
+
+impl Module {
+    pub fn new() -> Self {
+        Self { items: Vec::new() }
+    }
+
+    pub fn add_item(&mut self, item: ModuleItems) {
+        self.items.push(item);
+    }
 }
