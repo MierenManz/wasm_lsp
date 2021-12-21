@@ -1,6 +1,6 @@
 use logos::Logos;
 
-#[derive(Debug, Logos, PartialEq)]
+#[derive(Clone, Copy, Debug, Logos, PartialEq)]
 pub enum Tokens<'a> {
     #[error]
     Error,
@@ -16,6 +16,12 @@ pub enum Tokens<'a> {
 
     #[token("func")]
     Func,
+
+    #[token("export")]
+    Export,
+
+    #[token("memory")]
+    Memory,
 
     #[token("param")]
     Param,
